@@ -59,18 +59,18 @@ Environment variables:
 
 | Command | What it does |
 |---|---|
-| `/librewolf` | Open a new window in the same profile (existing windows untouched) |
+| `/librewolf` | Show a Pi-readable status summary (opens nothing) |
 | `/librewolf tab [url]` | Open a new tab in the current window |
 | `/librewolf close [handle]` | Close a tab by its handle |
-| `/librewolf connect` | Check the connection to the currently open browser |
-| `/librewolf status` | Same as `connect` |
+| `/librewolf connect` | Same as bare `/librewolf` |
+| `/librewolf status` | Same as bare `/librewolf` |
 | `/librewolf tabs` | Report open tabs |
 | `/librewolf window [url]` | Open a new window, optionally at a URL |
 | `/librewolf doctor` | Diagnose bridge / extension connection |
 | `/librewolf onboard` | Print the install steps |
 
 > Note: the `librewolf_*` **tools** never appear in the `/` menu; the model calls
-> them. Use `/librewolf connect` to test the connection by hand.
+> them. Use `/librewolf` to test the connection by hand.
 
 ## Tools (model-facing)
 

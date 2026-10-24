@@ -16,7 +16,7 @@ or Marionette — the browser stays completely normal.
 
 ## Commands
 
-- `/librewolf` — open a new window in the same profile
+- `/librewolf` — Pi-readable status summary (opens nothing)
 - `/librewolf tab [url]` — open a new tab in the current window
 - `/librewolf close [handle]` — close a tab by its handle
 - `/librewolf connect` / `status` — check the connection

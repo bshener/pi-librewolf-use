@@ -378,6 +378,28 @@ const windowTool = defineTool({
   },
 });
 
+/** Pi-readable connection summary: state, active page, tab list, how to proceed. */
+async function connectionSummary(): Promise<string> {
+  const s = (await runAction("status")) as {
+    title: string;
+    url: string;
+    tabCount: number;
+  };
+  const tabs = (await runAction("tabs")) as Array<{
+    active: boolean;
+    title: string;
+  }>;
+  const lines = [
+    `Connected (${bridgeHost()}:${bridgePort()}): ${s.title || "(untitled)"} — ${s.url} · ${tabs.length} tabs.`,
+    "LibreWolf is ready. Tools act on the active tab; open new tabs with /librewolf tab [url] or the librewolf_tab tool.",
+  ];
+  for (const t of tabs.slice(0, 15)) {
+    lines.push(`${t.active ? "*" : " "} ${(t.title || "(untitled)").slice(0, 100)}`);
+  }
+  if (tabs.length > 15) lines.push(`… and ${tabs.length - 15} more (see /librewolf tabs)`);
+  return lines.join("\n");
+}
+
 function onboardText(): string {
   return [
     "To connect Pi to your normal LibreWolf:",
@@ -414,18 +436,15 @@ export default function (pi: ExtensionAPI) {
   pi.registerTool(closeTabTool);
   pi.registerCommand("librewolf", {
     description:
-      "LibreWolf: /librewolf opens a new window | tab [url] | close [handle] | connect | status | tabs | window [url] | doctor | onboard.",
+      "LibreWolf: /librewolf shows connection status | tab [url] | close [handle] | connect | status | tabs | window [url] | doctor | onboard.",
     async handler(args, ctx) {
       const notify = (msg: string, type?: "info" | "warning" | "error") =>
         ctx.ui.notify(msg, type ?? "info");
       const trimmed = args.trim();
-      // Bare /librewolf opens a new window in the same profile.
+      // Bare /librewolf prints a Pi-readable status summary and opens nothing.
       if (!trimmed) {
         try {
-          const r = (await runAction("window", { url: null })) as {
-            url: string;
-          };
-          notify(`New window: ${r.url}`);
+          notify(await connectionSummary());
         } catch (e) {
           notify(`LibreWolf error: ${(e as Error).message.split("\n")[0]}`, "error");
         }
@@ -469,14 +488,7 @@ export default function (pi: ExtensionAPI) {
           return;
         }
         if (sub === "status" || sub === "connect") {
-          const s = (await runAction("status")) as {
-            title: string;
-            url: string;
-            tabCount: number;
-          };
-          notify(
-            `Connected (${bridgeHost()}:${bridgePort()}): ${s.title || "(untitled)"} — ${s.url} · ${s.tabCount} tabs`,
-          );
+          notify(await connectionSummary());
           return;
         }
         if (sub === "tabs") {
