@@ -30,7 +30,18 @@ Date: 2026-10-24 (carried over from the llm-playground session)
    `~/.pi/agent/npm/node_modules/pi-chrome/extensions/chrome-profile-bridge/browser-extension/`
    is open source but serious work.
 
-## Decision for this repo
+## Pivot (2026-10-24): companion-extension architecture
+
+The Marionette approach was abandoned: it requires launching LibreWolf with
+`--marionette`, so a "normal launch + control on demand" is impossible with
+it. The project now follows the pi-chrome shape instead:
+- `browser-extension/` (MV2 WebExtension) runs in the user's everyday profile.
+- `src/bridge.ts` hosts a localhost HTTP broker (default 127.0.0.1:17319)
+  with long-poll `/next` + `/result`, multi-Pi client forwarding included.
+- All 15 tools and the `/librewolf` command talk through `runAction()`.
+- No flags, no Marionette, no new processes. Selenium was removed entirely.
+- Install: `xpinstall.signatures.required=false` + Install Add-on From File
+  (LibreWolf honors the pref; verified via sideload + full E2E suite).
 
 - `~/Documents/repos/pi-librewolf-use/` was emptied by the user.
 - The project (re)starts here with the information from this session.

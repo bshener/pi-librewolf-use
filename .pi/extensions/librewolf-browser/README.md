@@ -1,29 +1,29 @@
 # librewolf-browser (Pi extension)
 
-Attaches to a running LibreWolf/Firefox. It is not a browser extension and never
-starts a new browser.
+Controls the user's normal LibreWolf/Firefox through the companion
+"LibreWolf Pi Bridge" WebExtension and a machine-local HTTP broker.
+It is not a browser extension, launches nothing, and needs no flags
+or Marionette — the browser stays completely normal.
 
-## Setup
+## Setup (user, one time)
 
-1. LibreWolf → `about:config` → `marionette.enabled = true`
-2. Note `marionette.port` (default 2828)
-3. Enable the listener: `systemctl --user set-environment MOZ_MARIONETTE=1`
-   (plus `~/.config/environment.d/` for persistence), or `librewolf --marionette`
-   for a one-shot terminal launch
-4. Fully quit LibreWolf and relaunch it
-5. If needed: `npm install` (in this folder — for selenium-webdriver)
-6. Start Pi in the repo root, the extension loads automatically.
+1. LibreWolf → `about:config` → `xpinstall.signatures.required = false`
+2. `about:addons` → gear icon → Install Add-on From File →
+   `browser-extension/` from this repo (or the packaged
+   `librewolf-pi-bridge.xpi`)
+3. Keep that LibreWolf window open, start Pi in the repo root —
+   the broker starts automatically.
 
 ## Commands
 
-- `/librewolf connect` — connect to the currently open browser
-- `/librewolf status` — same as connect
+- `/librewolf` — open a new window in the same profile
+- `/librewolf connect` / `status` — check the connection
 - `/librewolf tabs` — report open tabs
-- `/librewolf window [url]` — open a new window in the same profile
-- `/librewolf doctor` — diagnose port / connection issues
+- `/librewolf window [url]` — open a new window, optionally at a URL
+- `/librewolf doctor` — diagnose bridge / extension connection
+- `/librewolf onboard` — print the install steps
 
 ## Environment variables
 
-- `LIBREWOLF_MARIONETTE_HOST` (default `127.0.0.1`)
-- `LIBREWOLF_MARIONETTE_PORT` (default `2828`)
-- `LIBREWOLF_BINARY` (optional)
+- `LIBREWOLF_BRIDGE_HOST` (default `127.0.0.1`)
+- `LIBREWOLF_BRIDGE_PORT` (default `17319`)
