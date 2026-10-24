@@ -1,0 +1,18 @@
+{
+  "name": "pi-librewolf-use",
+  "version": "0.1.0",
+  "description": "Pi coding agent extension to control a running LibreWolf/Firefox via Marionette",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "^1.4.0",
+    "@earendil-works/pi-coding-agent": "^1.4.0",
+    "@types/node": "^22.0.0",
+    "@types/selenium-webdriver": "^4.35.7",
+    "selenium-webdriver": "^4.27.0",
+    "typescript": "^5.6.0"
+  }
+}

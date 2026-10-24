@@ -1,0 +1,9 @@
+{
+  "name": "librewolf-browser",
+  "version": "0.1.0",
+  "description": "Pi extension: control a running LibreWolf/Firefox via Marionette (NOT a browser extension)",
+  "type": "module",
+  "dependencies": {
+    "selenium-webdriver": "^4.27.0"
+  }
+}
