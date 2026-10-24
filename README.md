@@ -49,6 +49,7 @@ Environment variables:
 | `/librewolf connect` | Connect to the currently open browser (port probe + status + tab count) |
 | `/librewolf status` | Same as `connect` |
 | `/librewolf tabs` | Report open tabs |
+| `/librewolf window [url]` | Open a new window in the same profile (existing windows untouched) |
 | `/librewolf doctor` | Diagnose port / connection issues |
 
 > Note: the `librewolf_*` **tools** never appear in the `/` menu; the model calls
@@ -69,6 +70,7 @@ Environment variables:
 | `librewolf_press_key` | Send a key (Enter, Escape, Tab, …) |
 | `librewolf_evaluate` | Run JS on the page (returns JSON) |
 | `librewolf_screenshot` | Capture a screenshot to a file |
+| `librewolf_window` | Open a new window in the same profile |
 | `librewolf_wait_for` | Wait for a selector or JS condition |
 
 See `AGENTS.md` for detailed agent rules and `CONTEXT.md` for session context.

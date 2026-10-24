@@ -154,6 +154,40 @@ export async function navigateTo(url: string): Promise<{ url: string }> {
   return { url: await driver.getCurrentUrl() };
 }
 
+/** Open a new window in the same profile/process without touching existing windows.
+ *  Focus stays in the new window so follow-up commands act there.
+ *
+ *  Note: LibreWolf's Marionette build does not implement the WebDriver
+ *  New Window command, so this uses window.open() with window features
+ *  (which opens a real window under default link prefs). */
+export async function openWindow(
+  url = "about:blank",
+): Promise<{ handle: string; url: string }> {
+  const driver = await getDriver();
+  const before = new Set(await driver.getAllWindowHandles());
+  await driver.executeScript(
+    "window.open(arguments[0], '_blank', 'width=1024,height=768');",
+    url,
+  );
+  const deadline = Date.now() + 8000;
+  let handle: string | undefined;
+  while (Date.now() < deadline) {
+    const handles = await driver.getAllWindowHandles();
+    handle = handles.find((h) => !before.has(h));
+    if (handle) break;
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  if (!handle) {
+    throw new Error("Could not open a new window (popup blocked?).");
+  }
+  await driver.switchTo().window(handle);
+  const current = await driver.getCurrentUrl().catch(() => "about:blank");
+  if (current === "about:blank" && url !== "about:blank") {
+    await driver.get(url);
+  }
+  return { handle, url: await driver.getCurrentUrl() };
+}
+
 /** Lightweight page summary: title, URL, and the first N headings, links, and buttons. */
 export async function snapshot(limit = 30): Promise<string> {
   const driver = await getDriver();

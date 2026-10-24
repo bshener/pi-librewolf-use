@@ -15,6 +15,7 @@ import {
   listTabs,
   marionetteHint,
   navigateTo,
+  openWindow,
   pressKey,
   probeMarionette,
   snapshot,
@@ -240,6 +241,24 @@ const shotTool = defineTool({
   },
 });
 
+const windowTool = defineTool({
+  name: "librewolf_window",
+  label: "LibreWolf Window",
+  description:
+    "Open a new window in the same profile without touching existing windows.",
+  parameters: Type.Object({
+    url: Type.Optional(Type.String({ description: "URL to open (default about:blank)" })),
+  }),
+  async execute(_id, params) {
+    try {
+      const r = await openWindow(params.url);
+      return ok(`Window opened: ${r.url}`, r);
+    } catch (e) {
+      return err(e);
+    }
+  },
+});
+
 const waitTool = defineTool({
   name: "librewolf_wait_for",
   label: "LibreWolf Wait",
@@ -300,11 +319,14 @@ export default function (pi: ExtensionAPI) {
   pi.registerTool(evalTool);
   pi.registerTool(shotTool);
   pi.registerTool(waitTool);
+  pi.registerTool(windowTool);
   pi.registerCommand("librewolf", {
     description:
-      "LibreWolf connection: /librewolf connect | status | tabs | doctor — attaches to the currently open browser.",
+      "LibreWolf connection: /librewolf connect | status | tabs | window [url] | doctor — attaches to the currently open browser.",
     async handler(args, ctx) {
-      const sub = (args.trim().split(/\s+/)[0] ?? "connect").toLowerCase();
+      const parts = args.trim().split(/\s+/);
+      const sub = (parts[0] ?? "connect").toLowerCase();
+      const rest = parts.slice(1).join(" ");
       const notify = (msg: string, type?: "info" | "warning" | "error") =>
         ctx.ui.notify(msg, type ?? "info");
       try {
@@ -322,6 +344,11 @@ export default function (pi: ExtensionAPI) {
           } catch (e) {
             notify(`Connection error: ${(e as Error).message.split("\n")[0]}`, "error");
           }
+          return;
+        }
+        if (sub === "window") {
+          const r = await openWindow(rest || undefined);
+          notify(`New window: ${r.url}`);
           return;
         }
         if (sub === "tabs") {

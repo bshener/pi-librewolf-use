@@ -50,7 +50,7 @@ The repo root also has `README.md`, `CONTEXT.md`, `package.json`, `tsconfig.json
 - When adding a tool, use `defineTool` + `Type.Object` parameter schema.
 - Everything that must appear in the `/` menu has to be a command via
   `pi.registerCommand`; tools never show in the menu, the model calls them
-  (`/librewolf connect | status | tabs | doctor`).
+  (`/librewolf connect | status | tabs | window [url] | doctor`).
 - Each tool shares the driver via `try/finally`, never closes it (single driver per session).
 - On connection failure, return a message telling the user the `about:config` steps in English.
 - Screenshots default to dated filenames under `.pi/librewolf-screenshots/`.

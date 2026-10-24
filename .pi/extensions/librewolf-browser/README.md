@@ -19,6 +19,7 @@ starts a new browser.
 - `/librewolf connect` — connect to the currently open browser
 - `/librewolf status` — same as connect
 - `/librewolf tabs` — report open tabs
+- `/librewolf window [url]` — open a new window in the same profile
 - `/librewolf doctor` — diagnose port / connection issues
 
 ## Environment variables
