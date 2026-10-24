@@ -9,5 +9,5 @@
     "rootDir": ".",
     "types": ["node"]
   },
-  "include": [".pi/extensions/librewolf-browser/src/**/*.ts"]
+  "include": [".pi/extensions/pi-librewolf-use/src/**/*.ts"]
 }

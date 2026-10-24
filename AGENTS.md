@@ -8,7 +8,7 @@ page snapshot, clicking, form filling, key presses, JS evaluation, screenshots,
 waiting, new windows.
 
 **Important:** this Pi extension is installed under
-`.pi/extensions/librewolf-browser/` — it is **not** a browser extension. The
+`.pi/extensions/pi-librewolf-use/` — it is **not** a browser extension. The
 browser side is a small companion WebExtension (`browser-extension/`) that the
 user installs once in their everyday profile.
 
@@ -23,7 +23,7 @@ running profile via the extension's `windows` API — never a new process.
 browser-extension/
 ├── manifest.json      # MV2 WebExtension (tabs, windows, scripting, <all_urls>)
 └── background.js      # Long-polls the broker, executes actions, POSTs results
-.pi/extensions/librewolf-browser/
+.pi/extensions/pi-librewolf-use/
 ├── package.json          # No runtime dependencies (plain node:http broker)
 └── src/
     ├── index.ts          # Pi extension — tools + /librewolf command

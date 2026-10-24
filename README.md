@@ -45,7 +45,7 @@ cd ~/Documents/repos/pi-librewolf-use
 pi
 ```
 
-The Pi extension loads from `.pi/extensions/librewolf-browser/` and starts the
+The Pi extension loads from `.pi/extensions/pi-librewolf-use/` and starts the
 broker automatically. Verify with `/librewolf doctor`.
 
 Environment variables:

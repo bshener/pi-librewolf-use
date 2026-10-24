@@ -1,4 +1,4 @@
-# librewolf-browser (Pi extension)
+# pi-librewolf-use (Pi extension)
 
 Controls the user's normal LibreWolf/Firefox through the companion
 "LibreWolf Pi Bridge" WebExtension and a machine-local HTTP broker.
