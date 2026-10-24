@@ -8,7 +8,7 @@
 const BRIDGE_URL =
   (typeof BRIDGE_URL_OVERRIDE !== "undefined" && BRIDGE_URL_OVERRIDE) ||
   "http://127.0.0.1:17319";
-const CLIENT_NAME = "librewolf-pi-bridge/0.1.0";
+const CLIENT_NAME = "librewolf-pi-bridge/0.1.1";
 const FETCH_TIMEOUT_MS = 30_000;
 const RETRY_DELAY_MS = 3_000;
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "LibreWolf Pi Bridge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lets Pi control tabs in LibreWolf via a local bridge at 127.0.0.1. No flags, no Marionette — just install and keep LibreWolf open.",
   "permissions": [
     "tabs",

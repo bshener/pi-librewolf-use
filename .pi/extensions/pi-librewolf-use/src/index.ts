@@ -26,8 +26,13 @@ function ok(text: string, details?: unknown) {
 
 function err(e: unknown) {
   const msg = e instanceof Error ? e.message : String(e);
+  // The extension answered but does not know this action: it is outdated,
+  // not unreachable. Point at reinstall instead of the bridge hint.
+  const hint = /unknown action/i.test(msg)
+    ? `The installed "LibreWolf Pi Bridge" extension looks outdated (it does not know this action). Reinstall it from browser-extension/ in this repo (see /librewolf onboard), then retry.`
+    : bridgeHint();
   return {
-    content: [{ type: "text", text: `${msg}\n\n${bridgeHint()}` } as const],
+    content: [{ type: "text", text: `${msg}\n\n${hint}` } as const],
     details: { error: msg },
     isError: true as const,
   };
