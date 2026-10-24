@@ -33,8 +33,11 @@ The repo root also has `README.md`, `CONTEXT.md`, `package.json`, `tsconfig.json
 1. LibreWolf → `about:config`
 2. `marionette.enabled` = `true`
 3. Note the `marionette.port` value (default `2828`)
-4. Fully quit LibreWolf and relaunch it with the `--marionette` flag
-   (the `about:config` switch alone does not open the port)
+4. Enable the listener (the `about:config` switch alone does not open the port):
+   persistent dock/menu launches need `MOZ_MARIONETTE=1` in the session
+   environment (`systemctl --user set-environment` + `~/.config/environment.d/`);
+   a one-shot terminal launch uses `librewolf --marionette`
+5. Fully quit LibreWolf and relaunch it (all windows)
 
 ## Environment variables
 

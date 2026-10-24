@@ -19,14 +19,13 @@ The extension attaches to the running instance with `--connect-existing` semanti
 1. Open LibreWolf → `about:config`
 2. Set `marionette.enabled` = `true`
 3. Note the `marionette.port` value (default `2828`)
-4. **Fully quit LibreWolf and relaunch it with the `--marionette` flag**
-   (the `about:config` switch alone does not open the port):
-
-```bash
-librewolf --marionette
-```
-
-5. Start Pi in this directory:
+4. Enable the Marionette listener (the `about:config` switch alone does not open
+   the port) — pick one:
+   - **Persistent (dock/menu launches):** `systemctl --user set-environment MOZ_MARIONETTE=1`
+     (applies immediately; also add `MOZ_MARIONETTE=1` to
+     `~/.config/environment.d/librewolf-marionette.conf` so it survives re-login)
+   - **One-shot (terminal):** `librewolf --marionette`
+5. **Fully quit LibreWolf and relaunch it** (all windows) so the listener starts.
 
 ```bash
 cd ~/Documents/repos/pi-librewolf-use

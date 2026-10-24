@@ -7,9 +7,12 @@ starts a new browser.
 
 1. LibreWolf → `about:config` → `marionette.enabled = true`
 2. Note `marionette.port` (default 2828)
-3. Fully quit LibreWolf and relaunch it with the `--marionette` flag
-4. If needed: `npm install` (in this folder — for selenium-webdriver)
-5. Start Pi in the repo root, the extension loads automatically.
+3. Enable the listener: `systemctl --user set-environment MOZ_MARIONETTE=1`
+   (plus `~/.config/environment.d/` for persistence), or `librewolf --marionette`
+   for a one-shot terminal launch
+4. Fully quit LibreWolf and relaunch it
+5. If needed: `npm install` (in this folder — for selenium-webdriver)
+6. Start Pi in the repo root, the extension loads automatically.
 
 ## Commands
 
