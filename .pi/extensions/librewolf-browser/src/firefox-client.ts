@@ -1,14 +1,15 @@
 /**
- * LibreWolfClient — çalışan bir LibreWolf/Firefox örneğine Marionette
- * üzerinden bağlanan Selenium WebDriver sarmalayıcı.
+ * LibreWolfClient — Selenium WebDriver wrapper that connects to an
+ * already-running LibreWolf/Firefox instance via Marionette.
  *
- * KRİTİK KURAL: Asla yeni tarayıcı başlatma. Hep zaten açık olan
- * instance'a `--connect-existing` mantığıyla attach ol.
+ * CRITICAL RULE: Never launch a new browser. Always attach to the
+ * already-open instance with `--connect-existing` semantics.
  *
- * Kurulum (kullanıcı tarafında bir kez):
- *   about:config → marionette.enabled = true, marionette.port not edilir.
+ * One-time setup (user side):
+ *   about:config → marionette.enabled = true, note marionette.port.
  */
 
+import { Socket } from "node:net";
 import { Builder, By, until, type WebDriver } from "selenium-webdriver";
 import * as firefox from "selenium-webdriver/firefox.js";
 
@@ -27,11 +28,35 @@ export function marionettePort(): number {
 
 export function marionetteHint(): string {
   return (
-    `LibreWolf'a bağlanılamadı (${marionetteHost()}:${marionettePort()}). ` +
-    `LibreWolf açık olmalı ve about:config içinde marionette.enabled=true ` +
-    `olmalı. Portu marionette.port değerinden kontrol et, ` +
-    `gerekirse LIBREWOLF_MARIONETTE_PORT ortam değişkenini ayarla.`
+    `Could not connect to LibreWolf (${marionetteHost()}:${marionettePort()}). ` +
+    `LibreWolf must be open with marionette.enabled=true in about:config. ` +
+    `Check the port via marionette.port and set the ` +
+    `LIBREWOLF_MARIONETTE_PORT environment variable if needed.`
   );
+}
+
+/** Quick TCP probe of the Marionette port. Call before attempting a connection. */
+export async function probeMarionette(
+  timeoutMs = 3000,
+): Promise<{ open: boolean; host: string; port: number }> {
+  const host = marionetteHost();
+  const port = marionettePort();
+  const open = await new Promise<boolean>((resolve) => {
+    const s = new Socket();
+    let settled = false;
+    const done = (v: boolean) => {
+      if (settled) return;
+      settled = true;
+      s.destroy();
+      resolve(v);
+    };
+    s.setTimeout(timeoutMs);
+    s.once("connect", () => done(true));
+    s.once("timeout", () => done(false));
+    s.once("error", () => done(false));
+    s.connect(port, host);
+  });
+  return { open, host, port };
 }
 
 let sharedDriver: WebDriver | null = null;
@@ -43,13 +68,16 @@ async function buildDriver(): Promise<WebDriver> {
   const binary = process.env.LIBREWOLF_BINARY;
   if (binary) options.setBinary(binary);
 
-  // Zaten açık olan tarayıcıya bağlan. Yeni profil/instance açılmaz.
+  // Attach to the already-open browser. Never opens a new profile/instance.
+  // LIBREWOLF_MARIONETTE_HOST/PORT are forwarded to geckodriver here;
+  // without this, a custom port would be silently ignored.
   const service = new firefox.ServiceBuilder().addArguments(
     "--connect-existing",
+    "--marionette-host",
+    marionetteHost(),
+    "--marionette-port",
+    String(marionettePort()),
   );
-
-  // Marionette portunu geckodriver'a bildir.
-  // (geckodriver --connect-existing ile çalışan instance'a attach olur.)
   const driver = await new Builder()
     .forBrowser("firefox")
     .setFirefoxOptions(options)
@@ -59,7 +87,7 @@ async function buildDriver(): Promise<WebDriver> {
   return driver;
 }
 
-/** Session boyunca paylaşılan tek driver. Kapatılmaz, tekrar kullanılır. */
+/** Single shared driver for the session. Never closed, always reused. */
 export async function getDriver(): Promise<WebDriver> {
   if (sharedDriver) return sharedDriver;
   if (building) return building;
@@ -126,7 +154,7 @@ export async function navigateTo(url: string): Promise<{ url: string }> {
   return { url: await driver.getCurrentUrl() };
 }
 
-/** Sayfanın hafif özeti: başlık, URL, başlıklar, link ve butonların ilk N tanesi. */
+/** Lightweight page summary: title, URL, and the first N headings, links, and buttons. */
 export async function snapshot(limit = 30): Promise<string> {
   const driver = await getDriver();
   const data = await driver.executeScript(
@@ -152,17 +180,17 @@ export async function snapshot(limit = 30): Promise<string> {
   };
   const lines = [`# ${d.title}`, d.url, ""];
   if (d.headings.length) {
-    lines.push("## Başlıklar");
+    lines.push("## Headings");
     for (const h of d.headings) lines.push(`- ${h}`);
     lines.push("");
   }
   if (d.links.length) {
-    lines.push("## Linkler");
+    lines.push("## Links");
     for (const l of d.links) lines.push(`- ${l}`);
     lines.push("");
   }
   if (d.buttons.length) {
-    lines.push("## Butonlar");
+    lines.push("## Buttons");
     for (const b of d.buttons) lines.push(`- ${b}`);
   }
   return lines.join("\n");

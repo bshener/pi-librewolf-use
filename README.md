@@ -1,57 +1,75 @@
 # pi-librewolf-use
 
-Pi coding agent'in çalışan bir LibreWolf / Firefox örneğini uzaktan kullanması için
-Pi extension'ı. Tarayıcı eklentisi **değildir** — Selenium WebDriver + Marionette
-üzerinden zaten açık olan tarayıcıya bağlanır.
+A Pi coding agent extension to remotely control a running LibreWolf / Firefox
+instance. It is **not** a browser extension — it attaches to the already-open
+browser via Selenium WebDriver + Marionette.
 
-> Neden bu proje? `npm:pi-chrome` (v0.15.57, `tianrendong/pi-chrome`) sadece
-> Chrome/Chromium profiline bağlanır (`chrome.debugger` + CDP,
-> `chrome://extensions` ile load unpacked, `127.0.0.1:17318` bridge).
-> LibreWolf/Firefox için resmi karşılığı yoktur. Bu repo o boşluğu doldurur.
+> Why this project? `npm:pi-chrome` (v0.15.57, `tianrendong/pi-chrome`) only
+> attaches to a Chrome/Chromium profile (`chrome.debugger` + CDP,
+> load-unpacked via `chrome://extensions`, `127.0.0.1:17318` bridge).
+> There is no official equivalent for LibreWolf/Firefox. This repo fills that gap.
 
-## Kural (kritik)
+## Rule (critical)
 
-**Asla yeni LibreWolf instance'ı başlatma. Hep zaten açık olan tarayıcıya bağlan.**
-Extension `--connect-existing` mantığıyla çalışan instance'a attach olur.
+**Never launch a new LibreWolf instance. Always attach to the already-open browser.**
+The extension attaches to the running instance with `--connect-existing` semantics.
 
-## Kurulum
+## Setup
 
-1. LibreWolf'u aç → `about:config`
-2. `marionette.enabled` = `true`
-3. `marionette.port` değerini not et (varsayılan `2828`)
-4. Bu dizide Pi'yi başlat:
+1. Open LibreWolf → `about:config`
+2. Set `marionette.enabled` = `true`
+3. Note the `marionette.port` value (default `2828`)
+4. **Fully quit LibreWolf and relaunch it with the `--marionette` flag**
+   (the `about:config` switch alone does not open the port):
+
+```bash
+librewolf --marionette
+```
+
+5. Start Pi in this directory:
 
 ```bash
 cd ~/Documents/repos/pi-librewolf-use
 pi
 ```
 
-Extension `.pi/extensions/librewolf-browser/` altından otomatik yüklenir.
+The extension loads automatically from `.pi/extensions/librewolf-browser/`.
 
-Ortam değişkenleri:
+Environment variables:
 
-| Değişken | Varsayılan | Açıklama |
+| Variable | Default | Description |
 |---|---|---|
 | `LIBREWOLF_MARIONETTE_HOST` | `127.0.0.1` | Marionette host |
 | `LIBREWOLF_MARIONETTE_PORT` | `2828` | `about:config` → `marionette.port` |
-| `LIBREWOLF_BINARY` | otomatik | Gerekirse ikili yol (sadece fallback launch için) |
+| `LIBREWOLF_BINARY` | auto | Binary path if needed (fallback launch only) |
 
-## Araçlar
+## Commands (`/` menu)
 
-| Araç | Ne yapar |
+| Command | What it does |
 |---|---|
-| `librewolf_status` | Bağlantı + tarayıcı bilgisi |
-| `librewolf_tabs` | Açık sekmeleri/pencereleri listele |
-| `librewolf_navigate` | URL'ye git |
-| `librewolf_back` / `librewolf_forward` / `librewolf_reload` | Geçmiş + yenileme |
-| `librewolf_snapshot` | Sayfanın erişilebilirlik ağacı / başlık + link/button özeti |
-| `librewolf_click` | CSS selector ile tıkla |
-| `librewolf_type` | Odaklanıp metin yaz (append) |
-| `librewolf_fill` | Input/textarea değerini değiştir |
-| `librewolf_press_key` | Tuş gönder (Enter, Escape, Tab, …) |
-| `librewolf_evaluate` | Sayfada JS çalıştır (JSON döner) |
-| `librewolf_screenshot` | Ekran görüntüsü alıp dosyaya kaydet |
-| `librewolf_wait_for` | Selector ya da JS koşulu bekle |
+| `/librewolf connect` | Connect to the currently open browser (port probe + status + tab count) |
+| `/librewolf status` | Same as `connect` |
+| `/librewolf tabs` | Report open tabs |
+| `/librewolf doctor` | Diagnose port / connection issues |
 
-Detaylı ajan kuralları için `AGENTS.md`, bu oturumdan aktarılan bağlam için
-`CONTEXT.md` dosyasına bak.
+> Note: the `librewolf_*` **tools** never appear in the `/` menu; the model calls
+> them. Use the `/librewolf connect` command to test the connection by hand.
+
+## Tools (model-facing)
+
+| Tool | What it does |
+|---|---|
+| `librewolf_status` | Connection + browser info |
+| `librewolf_tabs` | List open tabs/windows |
+| `librewolf_navigate` | Navigate to a URL |
+| `librewolf_back` / `librewolf_forward` / `librewolf_reload` | History + reload |
+| `librewolf_snapshot` | Page summary (title + link/button overview) |
+| `librewolf_click` | Click via CSS selector |
+| `librewolf_type` | Focus and type text (append) |
+| `librewolf_fill` | Replace an input/textarea value |
+| `librewolf_press_key` | Send a key (Enter, Escape, Tab, …) |
+| `librewolf_evaluate` | Run JS on the page (returns JSON) |
+| `librewolf_screenshot` | Capture a screenshot to a file |
+| `librewolf_wait_for` | Wait for a selector or JS condition |
+
+See `AGENTS.md` for detailed agent rules and `CONTEXT.md` for session context.

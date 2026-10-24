@@ -1,50 +1,58 @@
 # AGENTS — Project Agent Rules
 
-## Bu proje nedir?
+## What is this project?
 
-Pi coding agent'in çalışan bir LibreWolf (veya Firefox) örneğini uzaktan
-kullanması için Pi extension'ı. 12 araç: bağlantı durumu, sekme yönetimi,
-navigasyon, sayfa snapshot'ı, tıklama, form doldurma, tuş, JS çalıştırma,
-screenshot, bekleme.
+A Pi coding agent extension to remotely control a running LibreWolf (or Firefox)
+instance. 14 tools: connection status, tab management, navigation, page snapshot,
+clicking, form filling, key presses, JS evaluation, screenshots, waiting.
 
-**Önemli:** Bu extension `.pi/extensions/librewolf-browser/` altına kurulur —
-bir **tarayıcı eklentisi değildir**. Çalışan tarayıcıya Marionette protokolü
-üzerinden (Selenium WebDriver ile) bağlanır.
+**Important:** this extension is installed under `.pi/extensions/librewolf-browser/` —
+it is **not** a browser extension. It attaches to the running browser via the
+Marionette protocol (Selenium WebDriver).
 
-**⚠️ KRİTİK KURAL: Asla yeni bir LibreWolf instance'ı başlatma. Hep zaten
-açık olan LibreWolf/Firefox tarayıcısına bağlan.** Extension `--connect-existing`
-mantığıyla attach olur, tarayıcı başlatmaz.
+**⚠️ CRITICAL RULE: Never launch a new LibreWolf instance. Always attach to the
+already-open LibreWolf/Firefox browser.** The extension attaches with
+`--connect-existing` semantics, it never starts a browser.
 
-## Proje yapısı
+## Project structure
 
 ```
 .pi/extensions/librewolf-browser/
 ├── package.json          # selenium-webdriver, geckodriver
 ├── src/
-│   ├── index.ts          # Pi extension — araç kayıtları
-│   └── firefox-client.ts # LibreWolfClient — Selenium WebDriver sarmalayıcı
-└── README.md             # Kurulum + kullanım
+│   ├── index.ts          # Pi extension — tool registrations
+│   └── firefox-client.ts # LibreWolfClient — Selenium WebDriver wrapper
+└── README.md             # Setup + usage
 ```
 
-Kök dizinde ayrıca `README.md`, `CONTEXT.md`, `package.json`, `tsconfig.json`
-vardır (derleme + tip kontrolü için).
+The repo root also has `README.md`, `CONTEXT.md`, `package.json`, `tsconfig.json`
+(for builds + type checking).
 
-## Tarayıcı kurulumu
+## Browser setup
 
 1. LibreWolf → `about:config`
 2. `marionette.enabled` = `true`
-3. `marionette.port` değerini not et (varsayılan `2828`)
+3. Note the `marionette.port` value (default `2828`)
+4. Fully quit LibreWolf and relaunch it with the `--marionette` flag
+   (the `about:config` switch alone does not open the port)
 
-## Ortam değişkenleri
+## Environment variables
 
-- `LIBREWOLF_MARIONETTE_HOST` (varsayılan `127.0.0.1`)
-- `LIBREWOLF_MARIONETTE_PORT` (varsayılan `2828`)
-- `LIBREWOLF_BINARY` (opsiyonel, sadece fallback için)
+- `LIBREWOLF_MARIONETTE_HOST` (default `127.0.0.1`)
+- `LIBREWOLF_MARIONETTE_PORT` (default `2828`)
+- `LIBREWOLF_BINARY` (optional, fallback launch only)
 
-## Kod kuralları
+## Code rules
 
-- Yeni araç eklerken `defineTool` + `Type.Object` parametre şeması kullan.
-- Her araç `try/finally` içinde driver'ı paylaşır, kapatmaz (session boyunca tek driver).
-- Bağlantı hatasında kullanıcıya `about:config` adımlarını söyleyen Türkçe mesaj döndür.
-- Screenshot'lar varsayılan olarak `.pi/librewolf-screenshots/` altına tarihli isimle kaydedilir.
-- `evaluate` ile dönen değer JSON-serialize edilebilir olmalı.
+- When adding a tool, use `defineTool` + `Type.Object` parameter schema.
+- Everything that must appear in the `/` menu has to be a command via
+  `pi.registerCommand`; tools never show in the menu, the model calls them
+  (`/librewolf connect | status | tabs | doctor`).
+- Each tool shares the driver via `try/finally`, never closes it (single driver per session).
+- On connection failure, return a message telling the user the `about:config` steps in English.
+- Screenshots default to dated filenames under `.pi/librewolf-screenshots/`.
+- `evaluate` must return JSON-serializable values.
+- All code, comments, tool/command descriptions, and user-facing messages must be in English.
+- Commit every change automatically: after completing a task (or a coherent group of
+  tasks), stage the related files and create a commit with a short English message.
+  Do not leave changes uncommitted and do not ask for confirmation first.

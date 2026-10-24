@@ -1,44 +1,44 @@
-# CONTEXT — Bu oturumdan aktarılan bilgiler
+# CONTEXT — Information carried over from this session
 
-Tarih: 2026-10-24 (llm-playground oturumundan aktarıldı)
+Date: 2026-10-24 (carried over from the llm-playground session)
 
-## Soru
+## Question
 
-> pi için chrome extension çok güzel çalışıyor, librewolf (firefox) için olanı var mı?
+> pi's chrome extension works great, is there one for librewolf (firefox)?
 
-## Bulgu
+## Finding
 
-- Kullanılan şey `npm:pi-chrome` paketi (v0.15.57, `tianrendong/pi-chrome`).
-- Kullanıcının `~/.pi/agent/settings.json` paket listesinde `npm:pi-chrome` yüklü.
-- **Resmi LibreWolf/Firefox karşılığı yok.**
+- What is used is the `npm:pi-chrome` package (v0.15.57, `tianrendong/pi-chrome`).
+- It is installed in the user's `~/.pi/agent/settings.json` package list.
+- **There is no official LibreWolf/Firefox equivalent.**
 
-## Neden yok? (teknik)
+## Why not? (technical)
 
-- pi-chrome `chrome.debugger` + CDP kullanır.
-- `chrome://extensions` → Load unpacked ile kurulur.
-- `127.0.0.1:17318` üzerindeki local bridge ile konuşur.
-- Firefox/LibreWolf eklenti API'si ve remote-debug protokolü farklı
-  (WebDriver BiDi / Marionette), LibreWolf hardening'i ek engel.
-- `pi.dev/packages` üzerindeki `pi-chrome-use`, `pi-control-chrome` da Chromium tabanlı.
+- pi-chrome uses `chrome.debugger` + CDP.
+- It is installed via `chrome://extensions` → Load unpacked.
+- It talks to the local bridge on `127.0.0.1:17318`.
+- The Firefox/LibreWolf extension API and remote-debug protocol are different
+  (WebDriver BiDi / Marionette), and LibreWolf hardening adds friction.
+- `pi.dev/packages` entries like `pi-chrome-use` and `pi-control-chrome` are also Chromium-based.
 
-## Alternatifler (oturumda konuşuldu)
+## Alternatives (discussed in the session)
 
-1. Chrome'u sadece Pi için yanında tut, LibreWolf ana browser kalsın (en sorunsuz).
-2. Firefox tarafında MCP ile çalış (Playwright / Browser-Use MCP, `pi mcp` ile eklenir;
-   signed-in profil rahatlığı pi-chrome kadar olmaz).
-3. Companion kodundan portlama:
+1. Keep Chrome around just for Pi, LibreWolf stays the main browser (smoothest).
+2. Work via MCP on the Firefox side (Playwright / Browser-Use MCP, added via `pi mcp`;
+   signed-in profile comfort won't match pi-chrome).
+3. Port from the companion code:
    `~/.pi/agent/npm/node_modules/pi-chrome/extensions/chrome-profile-bridge/browser-extension/`
-   açık kaynak ama ciddi iş.
+   is open source but serious work.
 
-## Bu repoya karar
+## Decision for this repo
 
-- `~/Documents/repos/pi-librewolf-use/` içi kullanıcı tarafından boşaltıldı.
-- Bu oturumdaki bilgilerle proje buraya (yeniden) açılıyor.
-- Mimari: Pi extension + Selenium WebDriver + Marionette, çalışan tarayıcıya attach.
-- Eski AGENTS.md'deki 18 araç hedefi ilk etapta 12 çekirdek araçla başlatıldı,
-  yapı yeni araç eklemeye açık.
+- `~/Documents/repos/pi-librewolf-use/` was emptied by the user.
+- The project (re)starts here with the information from this session.
+- Architecture: Pi extension + Selenium WebDriver + Marionette, attaching to the running browser.
+- The initial target of 18 tools in the old AGENTS.md started with 12 core tools,
+  the structure is open to new tools.
 
-## Kaynaklar
+## References
 
 - pi-chrome npm: `pi-chrome@0.15.57`
 - repo: https://github.com/tianrendong/pi-chrome

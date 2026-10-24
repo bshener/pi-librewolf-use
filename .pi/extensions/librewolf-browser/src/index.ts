@@ -1,7 +1,7 @@
 /**
  * librewolf-browser — Pi extension.
- * Çalışan LibreWolf/Firefox'a Marionette üzerinden bağlanır.
- * Tarayıcı eklentisi DEĞİLDİR, yeni tarayıcı BAŞLATMAZ.
+ * Connects to a running LibreWolf/Firefox via Marionette.
+ * NOT a browser extension, does NOT launch a new browser.
  */
 
 import { Type } from "@earendil-works/pi-ai";
@@ -16,6 +16,7 @@ import {
   marionetteHint,
   navigateTo,
   pressKey,
+  probeMarionette,
   snapshot,
   takeScreenshot,
   typeInto,
@@ -48,12 +49,12 @@ const statusTool = defineTool({
   name: "librewolf_status",
   label: "LibreWolf Status",
   description:
-    "Çalışan LibreWolf/Firefox bağlantısını ve aktif sayfa bilgisini döndür.",
+    "Connection status of the running LibreWolf/Firefox and the active page info.",
   parameters: Type.Object({}),
   async execute() {
     try {
       const s = await getStatus();
-      return ok(`Bağlı: ${s.title} — ${s.url}`, s);
+      return ok(`Connected: ${s.title} — ${s.url}`, s);
     } catch (e) {
       return err(e);
     }
@@ -63,7 +64,7 @@ const statusTool = defineTool({
 const tabsTool = defineTool({
   name: "librewolf_tabs",
   label: "LibreWolf Tabs",
-  description: "Açık pencere/sekme listesini döndür.",
+  description: "List open windows/tabs.",
   parameters: Type.Object({}),
   async execute() {
     try {
@@ -71,7 +72,7 @@ const tabsTool = defineTool({
       const text = tabs
         .map((t) => `${t.active ? "*" : " "} ${t.title} — ${t.url}`)
         .join("\n");
-      return ok(text || "(sekme yok)", tabs);
+      return ok(text || "(no tabs)", tabs);
     } catch (e) {
       return err(e);
     }
@@ -81,14 +82,14 @@ const tabsTool = defineTool({
 const navigateTool = defineTool({
   name: "librewolf_navigate",
   label: "LibreWolf Navigate",
-  description: "Aktif sekmede URL'ye git.",
+  description: "Navigate the active tab to a URL.",
   parameters: Type.Object({
-    url: Type.String({ description: "Gidilecek URL" }),
+    url: Type.String({ description: "URL to navigate to" }),
   }),
   async execute(_id, params) {
     try {
       const r = await navigateTo(params.url);
-      return ok(`Gidildi: ${r.url}`, r);
+      return ok(`Navigated: ${r.url}`, r);
     } catch (e) {
       return err(e);
     }
@@ -104,7 +105,7 @@ const goTool = (name: string, label: string, desc: string, fn: () => Promise<unk
     async execute() {
       try {
         const r = await fn();
-        return ok(`${label} tamam`, r);
+        return ok(`${label} done`, r);
       } catch (e) {
         return err(e);
       }
@@ -114,10 +115,10 @@ const goTool = (name: string, label: string, desc: string, fn: () => Promise<unk
 const snapshotTool = defineTool({
   name: "librewolf_snapshot",
   label: "LibreWolf Snapshot",
-  description: "Sayfanın başlık/link/buton özetini döndür.",
+  description: "Return a title/link/button summary of the page.",
   parameters: Type.Object({
     limit: Type.Optional(
-      Type.Number({ description: "Kategori başına en fazla öğe (varsayılan 30)" }),
+      Type.Number({ description: "Max items per category (default 30)" }),
     ),
   }),
   async execute(_id, params) {
@@ -133,14 +134,14 @@ const snapshotTool = defineTool({
 const clickTool = defineTool({
   name: "librewolf_click",
   label: "LibreWolf Click",
-  description: "CSS selector ile öğeye tıkla.",
+  description: "Click an element by CSS selector.",
   parameters: Type.Object({
-    selector: Type.String({ description: "CSS selector, örn. button.submit" }),
+    selector: Type.String({ description: "CSS selector, e.g. button.submit" }),
   }),
   async execute(_id, params) {
     try {
       const r = await clickSelector(params.selector);
-      return ok(`Tıklandı: ${params.selector}`, r);
+      return ok(`Clicked: ${params.selector}`, r);
     } catch (e) {
       return err(e);
     }
@@ -150,15 +151,15 @@ const clickTool = defineTool({
 const typeTool = defineTool({
   name: "librewolf_type",
   label: "LibreWolf Type",
-  description: "Selectordeki alana metin yaz (mevcut içeriğe ekler).",
+  description: "Type text into the field at the selector (appends to existing content).",
   parameters: Type.Object({
     selector: Type.String({ description: "CSS selector" }),
-    text: Type.String({ description: "Yazılacak metin" }),
+    text: Type.String({ description: "Text to type" }),
   }),
   async execute(_id, params) {
     try {
       const r = await typeInto(params.selector, params.text);
-      return ok(`Yazıldı: ${params.selector}`, r);
+      return ok(`Typed: ${params.selector}`, r);
     } catch (e) {
       return err(e);
     }
@@ -168,15 +169,15 @@ const typeTool = defineTool({
 const fillTool = defineTool({
   name: "librewolf_fill",
   label: "LibreWolf Fill",
-  description: "Input/textarea değerini değiştir (önce temizler).",
+  description: "Replace an input/textarea value (clears first).",
   parameters: Type.Object({
     selector: Type.String({ description: "CSS selector" }),
-    text: Type.String({ description: "Yeni değer" }),
+    text: Type.String({ description: "New value" }),
   }),
   async execute(_id, params) {
     try {
       const r = await fillInto(params.selector, params.text);
-      return ok(`Dolduruldu: ${params.selector}`, r);
+      return ok(`Filled: ${params.selector}`, r);
     } catch (e) {
       return err(e);
     }
@@ -186,15 +187,15 @@ const fillTool = defineTool({
 const keyTool = defineTool({
   name: "librewolf_press_key",
   label: "LibreWolf Key",
-  description: "Tuş gönder (ENTER, ESCAPE, TAB, BACKSPACE, DELETE, oklar).",
+  description: "Send a key (ENTER, ESCAPE, TAB, BACKSPACE, DELETE, arrows).",
   parameters: Type.Object({
-    key: Type.String({ description: "Tuş adı" }),
-    selector: Type.Optional(Type.String({ description: "Opsiyonel CSS selector" })),
+    key: Type.String({ description: "Key name" }),
+    selector: Type.Optional(Type.String({ description: "Optional CSS selector" })),
   }),
   async execute(_id, params) {
     try {
       const r = await pressKey(params.key, params.selector);
-      return ok(`Tuş: ${params.key}`, r);
+      return ok(`Key: ${params.key}`, r);
     } catch (e) {
       return err(e);
     }
@@ -204,10 +205,10 @@ const keyTool = defineTool({
 const evalTool = defineTool({
   name: "librewolf_evaluate",
   label: "LibreWolf Evaluate",
-  description: "Sayfada JS çalıştır, JSON-serialize sonucu döndür.",
+  description: "Run JS on the page, return a JSON-serializable result.",
   parameters: Type.Object({
     script: Type.String({
-      description: "JS gövdesi, örn. return document.title",
+      description: "JS body, e.g. return document.title",
     }),
   }),
   async execute(_id, params) {
@@ -223,16 +224,16 @@ const evalTool = defineTool({
 const shotTool = defineTool({
   name: "librewolf_screenshot",
   label: "LibreWolf Screenshot",
-  description: "Ekran görüntüsü alıp dosyaya kaydet.",
+  description: "Take a screenshot and save it to a file.",
   parameters: Type.Object({
     path: Type.Optional(
-      Type.String({ description: "Kayıt yolu (varsayılan .pi/librewolf-screenshots/)" }),
+      Type.String({ description: "Save path (default .pi/librewolf-screenshots/)" }),
     ),
   }),
   async execute(_id, params) {
     try {
       const r = await takeScreenshot(params.path ?? screenshotPath());
-      return ok(`Kaydedildi: ${r.path}`, r);
+      return ok(`Saved: ${r.path}`, r);
     } catch (e) {
       return err(e);
     }
@@ -242,21 +243,21 @@ const shotTool = defineTool({
 const waitTool = defineTool({
   name: "librewolf_wait_for",
   label: "LibreWolf Wait",
-  description: "Selector ya da JS koşulu gerçekleşene kadar bekle.",
+  description: "Wait until a selector or JS condition holds.",
   parameters: Type.Object({
-    target: Type.String({ description: "CSS selector ya da JS gövdesi" }),
+    target: Type.String({ description: "CSS selector or JS body" }),
     kind: Type.Optional(
-      Type.String({ description: "selector | js (varsayılan selector)" }),
+      Type.String({ description: "selector | js (default selector)" }),
     ),
     timeoutMs: Type.Optional(
-      Type.Number({ description: "Zaman aşımı ms (varsayılan 10000)" }),
+      Type.Number({ description: "Timeout in ms (default 10000)" }),
     ),
   }),
   async execute(_id, params) {
     try {
       const kind = params.kind === "js" ? "js" : "selector";
       await waitFor(params.target, params.timeoutMs ?? 10000, kind);
-      return ok("Koşul sağlandı", { target: params.target });
+      return ok("Condition met", { target: params.target });
     } catch (e) {
       return err(e);
     }
@@ -268,7 +269,7 @@ export default function (pi: ExtensionAPI) {
   pi.registerTool(tabsTool);
   pi.registerTool(navigateTool);
   pi.registerTool(
-    goTool("librewolf_back", "LibreWolf Back", "Geri git.", async () => {
+    goTool("librewolf_back", "LibreWolf Back", "Go back.", async () => {
       const { getDriver } = await import("./firefox-client.js");
       const d = await getDriver();
       await d.navigate().back();
@@ -276,7 +277,7 @@ export default function (pi: ExtensionAPI) {
     }),
   );
   pi.registerTool(
-    goTool("librewolf_forward", "LibreWolf Forward", "İleri git.", async () => {
+    goTool("librewolf_forward", "LibreWolf Forward", "Go forward.", async () => {
       const { getDriver } = await import("./firefox-client.js");
       const d = await getDriver();
       await d.navigate().forward();
@@ -284,7 +285,7 @@ export default function (pi: ExtensionAPI) {
     }),
   );
   pi.registerTool(
-    goTool("librewolf_reload", "LibreWolf Reload", "Sayfayı yenile.", async () => {
+    goTool("librewolf_reload", "LibreWolf Reload", "Reload the page.", async () => {
       const { getDriver } = await import("./firefox-client.js");
       const d = await getDriver();
       await d.navigate().refresh();
@@ -299,4 +300,56 @@ export default function (pi: ExtensionAPI) {
   pi.registerTool(evalTool);
   pi.registerTool(shotTool);
   pi.registerTool(waitTool);
+  pi.registerCommand("librewolf", {
+    description:
+      "LibreWolf connection: /librewolf connect | status | tabs | doctor — attaches to the currently open browser.",
+    async handler(args, ctx) {
+      const sub = (args.trim().split(/\s+/)[0] ?? "connect").toLowerCase();
+      const notify = (msg: string, type?: "info" | "warning" | "error") =>
+        ctx.ui.notify(msg, type ?? "info");
+      try {
+        if (sub === "doctor") {
+          const probe = await probeMarionette();
+          notify(
+            `Marionette ${probe.host}:${probe.port} → ${probe.open ? "open" : "closed"}` +
+              (probe.open ? "" : "; restart LibreWolf with the --marionette flag"),
+            probe.open ? "info" : "warning",
+          );
+          try {
+            const s = await getStatus();
+            const tabs = await listTabs();
+            notify(`Connection OK: ${s.title || "(untitled)"} — ${s.url} · ${tabs.length} tab(s)`);
+          } catch (e) {
+            notify(`Connection error: ${(e as Error).message.split("\n")[0]}`, "error");
+          }
+          return;
+        }
+        if (sub === "tabs") {
+          const tabs = await listTabs();
+          notify(
+            tabs.length
+              ? tabs.map((t) => `${t.active ? "*" : " "} ${t.title || "(untitled)"} — ${t.url}`).join("\n")
+              : "(no tabs)",
+          );
+          return;
+        }
+        // connect | status (default is connect)
+        const probe = await probeMarionette();
+        if (!probe.open) {
+          notify(
+            `Marionette is closed (${probe.host}:${probe.port}). Restart LibreWolf with the --marionette flag; see /librewolf doctor for details`,
+            "error",
+          );
+          return;
+        }
+        const s = await getStatus();
+        const tabs = await listTabs();
+        notify(
+          `Connected (${probe.host}:${probe.port}): ${s.title || "(untitled)"} — ${s.url} · ${tabs.length} tab(s)`,
+        );
+      } catch (e) {
+        notify(`LibreWolf error: ${(e as Error).message.split("\n")[0]}`, "error");
+      }
+    },
+  });
 }
