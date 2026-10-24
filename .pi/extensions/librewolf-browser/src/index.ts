@@ -322,13 +322,24 @@ export default function (pi: ExtensionAPI) {
   pi.registerTool(windowTool);
   pi.registerCommand("librewolf", {
     description:
-      "LibreWolf connection: /librewolf connect | status | tabs | window [url] | doctor — attaches to the currently open browser.",
+      "LibreWolf: /librewolf opens a new window | connect | status | tabs | window [url] | doctor.",
     async handler(args, ctx) {
-      const parts = args.trim().split(/\s+/);
-      const sub = (parts[0] ?? "connect").toLowerCase();
-      const rest = parts.slice(1).join(" ");
       const notify = (msg: string, type?: "info" | "warning" | "error") =>
         ctx.ui.notify(msg, type ?? "info");
+      const trimmed = args.trim();
+      // Bare /librewolf opens a new window in the same profile.
+      if (!trimmed) {
+        try {
+          const r = await openWindow(undefined);
+          notify(`New window: ${r.url}`);
+        } catch (e) {
+          notify(`LibreWolf error: ${(e as Error).message.split("\n")[0]}`, "error");
+        }
+        return;
+      }
+      const parts = trimmed.split(/\s+/);
+      const sub = (parts[0] ?? "connect").toLowerCase();
+      const rest = parts.slice(1).join(" ");
       try {
         if (sub === "doctor") {
           const probe = await probeMarionette();

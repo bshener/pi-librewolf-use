@@ -46,7 +46,8 @@ Environment variables:
 
 | Command | What it does |
 |---|---|
-| `/librewolf connect` | Connect to the currently open browser (port probe + status + tab count) |
+| `/librewolf` | Open a new window in the same profile (existing windows untouched) |
+| `/librewolf connect` | Check the connection to the currently open browser |
 | `/librewolf status` | Same as `connect` |
 | `/librewolf tabs` | Report open tabs |
 | `/librewolf window [url]` | Open a new window in the same profile (existing windows untouched) |
