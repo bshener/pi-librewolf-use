@@ -169,6 +169,26 @@ async function runAction(command) {
         url: (fresh && fresh.url) || params.url || "about:blank",
       };
     }
+    case "tab": {
+      const tab = await browser.tabs.create(
+        params.url ? { url: params.url, active: true } : { active: true },
+      );
+      if (params.url) {
+        await waitTabComplete(tab.id, 15_000).catch(() => {});
+      }
+      const fresh = await browser.tabs.get(tab.id).catch(() => tab);
+      return {
+        handle: String(fresh.id),
+        windowId: fresh.windowId,
+        url: fresh.url || params.url || "about:blank",
+      };
+    }
+    case "closeTab": {
+      const id = Number(params.handle);
+      if (!Number.isFinite(id)) throw new Error("closeTab needs a numeric tab handle");
+      await browser.tabs.remove(id);
+      return { closed: String(params.handle) };
+    }
     case "snapshot": {
       const tab = await activeTab();
       return runInTab(tab.id, snapshotCollectorCode(params.limit || 30));

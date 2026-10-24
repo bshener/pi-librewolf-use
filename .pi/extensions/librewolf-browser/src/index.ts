@@ -321,6 +321,43 @@ const waitTool = defineTool({
   },
 });
 
+const tabTool = defineTool({
+  name: "librewolf_tab",
+  label: "LibreWolf Tab",
+  description:
+    "Open a new tab in the current window without touching existing tabs.",
+  parameters: Type.Object({
+    url: Type.Optional(Type.String({ description: "URL to open (default about:blank)" })),
+  }),
+  async execute(_id, params) {
+    try {
+      const r = (await runAction("tab", { url: params.url ?? null })) as {
+        url: string;
+      };
+      return ok(`Tab opened: ${r.url}`, r);
+    } catch (e) {
+      return err(e);
+    }
+  },
+});
+
+const closeTabTool = defineTool({
+  name: "librewolf_close_tab",
+  label: "LibreWolf Close Tab",
+  description: "Close a tab by its handle (see librewolf_tabs).",
+  parameters: Type.Object({
+    handle: Type.String({ description: "Tab handle to close" }),
+  }),
+  async execute(_id, params) {
+    try {
+      const r = await runAction("closeTab", { handle: params.handle });
+      return ok(`Tab closed: ${params.handle}`, r);
+    } catch (e) {
+      return err(e);
+    }
+  },
+});
+
 const windowTool = defineTool({
   name: "librewolf_window",
   label: "LibreWolf Window",
@@ -373,9 +410,11 @@ export default function (pi: ExtensionAPI) {
   pi.registerTool(shotTool);
   pi.registerTool(waitTool);
   pi.registerTool(windowTool);
+  pi.registerTool(tabTool);
+  pi.registerTool(closeTabTool);
   pi.registerCommand("librewolf", {
     description:
-      "LibreWolf: /librewolf opens a new window | connect | status | tabs | window [url] | doctor | onboard.",
+      "LibreWolf: /librewolf opens a new window | tab [url] | close [handle] | connect | status | tabs | window [url] | doctor | onboard.",
     async handler(args, ctx) {
       const notify = (msg: string, type?: "info" | "warning" | "error") =>
         ctx.ui.notify(msg, type ?? "info");
@@ -463,8 +502,24 @@ export default function (pi: ExtensionAPI) {
           notify(`New window: ${r.url}`);
           return;
         }
+        if (sub === "tab") {
+          const r = (await runAction("tab", {
+            url: rest || null,
+          })) as { url: string };
+          notify(`New tab: ${r.url}`);
+          return;
+        }
+        if (sub === "close") {
+          if (!rest) {
+            notify("Usage: /librewolf close [tab handle] (see /librewolf tabs)", "warning");
+            return;
+          }
+          await runAction("closeTab", { handle: rest });
+          notify(`Tab closed: ${rest}`);
+          return;
+        }
         notify(
-          "Usage: /librewolf | connect | status | tabs | window [url] | doctor | onboard",
+          "Usage: /librewolf | tab [url] | close [handle] | connect | status | tabs | window [url] | doctor | onboard",
           "warning",
         );
       } catch (e) {

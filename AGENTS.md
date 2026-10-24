@@ -52,8 +52,8 @@ The repo root also has `README.md`, `CONTEXT.md`, `package.json`, `tsconfig.json
   `action` in `runAction`, plus a thin tool wrapper in `src/index.ts`.
 - Everything that must appear in the `/` menu has to be a command via
   `pi.registerCommand`; tools never show in the menu, the model calls them
-  (`/librewolf` opens a new window; `/librewolf connect | status | tabs |
-  window [url] | doctor | onboard`).
+  (`/librewolf` opens a new window; `/librewolf tab [url] | close [handle] |
+  connect | status | tabs | window [url] | doctor | onboard`).
 - Each tool goes through `runAction()`; never keep browser state in Pi.
 - On connection failure, return a message telling the user the install steps
   (`/librewolf onboard`) in English.

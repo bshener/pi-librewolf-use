@@ -60,6 +60,8 @@ Environment variables:
 | Command | What it does |
 |---|---|
 | `/librewolf` | Open a new window in the same profile (existing windows untouched) |
+| `/librewolf tab [url]` | Open a new tab in the current window |
+| `/librewolf close [handle]` | Close a tab by its handle |
 | `/librewolf connect` | Check the connection to the currently open browser |
 | `/librewolf status` | Same as `connect` |
 | `/librewolf tabs` | Report open tabs |
@@ -87,5 +89,7 @@ Environment variables:
 | `librewolf_screenshot` | Capture a screenshot to a file |
 | `librewolf_wait_for` | Wait for a selector or JS condition |
 | `librewolf_window` | Open a new window in the same profile |
+| `librewolf_tab` | Open a new tab in the current window |
+| `librewolf_close_tab` | Close a tab by its handle |
 
 See `AGENTS.md` for detailed agent rules and `CONTEXT.md` for session context.
