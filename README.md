@@ -102,6 +102,12 @@ every contribution goes straight back into new projects.
 <a href="https://buymeacoffee.com/bshener"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="60" /></a>
 <a href="https://www.patreon.com/bshener"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Become a Patron" height="60" /></a>
 
+## Credits
+
+Bridge architecture adapted from [pi-chrome](https://github.com/tianrendong/pi-chrome)
+(`npm:pi-chrome`), MIT © 2024–2026 pi-chrome contributors.
+See `THIRD-PARTY-NOTICES.md`.
+
 ## License
 
 MIT — see `LICENSE`.
