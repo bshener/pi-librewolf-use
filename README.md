@@ -94,6 +94,14 @@ Environment variables:
 
 See `AGENTS.md` for detailed agent rules and `CONTEXT.md` for session context.
 
+## Support
+
+Free forever — no paid features, no "Pro" split. If it saves you time,
+every contribution goes straight back into new projects.
+
+<a href="https://buymeacoffee.com/bshener"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="60" /></a>
+<a href="https://www.patreon.com/bshener"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Become a Patron" height="60" /></a>
+
 ## License
 
 MIT — see `LICENSE`.
