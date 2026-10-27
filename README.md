@@ -93,3 +93,7 @@ Environment variables:
 | `librewolf_close_tab` | Close a tab by its handle |
 
 See `AGENTS.md` for detailed agent rules and `CONTEXT.md` for session context.
+
+## License
+
+MIT — see `LICENSE`.

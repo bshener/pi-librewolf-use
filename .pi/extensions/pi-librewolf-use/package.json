@@ -2,6 +2,7 @@
   "name": "pi-librewolf-use",
   "version": "0.1.1",
   "description": "Pi extension: control the running LibreWolf/Firefox via a companion WebExtension (NOT a browser extension, no flags needed)",
+  "license": "MIT",
   "type": "module",
   "pi": {
     "extensions": ["./src/index.ts"]
